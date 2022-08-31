@@ -1,0 +1,7 @@
+{
+  "ID" : 101,
+  "Name" : "Rahmat",
+  "Status" : "Active",
+  "City" : "Hyderabad"
+
+}

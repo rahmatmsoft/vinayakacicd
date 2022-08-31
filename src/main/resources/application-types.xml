@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="ometa" format="json">
+      <types:shape format="weave" example="examples/outputmetadata.json"><![CDATA[%dw 2.0
+
+type ometa = {|
+  Employee_ID: Number {"typeId": "int"}, 
+  Employee_Name: String, 
+  Employee_Status: String, 
+  Employee_City: String
+|} {"example": "{\\\"Employee_ID\\\":101,\\\"Employee_Name\\\":\\\"Rahmat\\\",\\\"Employee_Status\\\":\\\"Active\\\",\\\"Employee_City\\\":\\\"Hyd\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="staffoutputmetadata" format="json">
+      <types:shape format="weave" example="examples/staffoutputmetadata.json.txt"><![CDATA[%dw 2.0
+
+type staffoutputmetadata = {|
+  ID: Number {"typeId": "int"}, 
+  Name: String, 
+  Status: String, 
+  City: String
+|} {"example": "{\\\"ID\\\":101,\\\"Name\\\":\\\"Rahmat\\\",\\\"Status\\\":\\\"Active\\\",\\\"City\\\":\\\"Hyderabad\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#0530eda5-fb26-4d34-aa68-d28e89b8bd21">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="staffoutputmetadata"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#2c3237fb-2bf5-465a-a969-bd58db3bd82d">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="staffoutputmetadata"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

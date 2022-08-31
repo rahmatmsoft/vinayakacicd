@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="caea1ad4-5e04-4bf4-bbbf-5d56979d33e2" >
+		<db:oracle-connection host="DESKTOP-43C3LIR" user="system" password="oraclepassword"/>
+	</db:config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="ee7ea77d-7b3c-4940-afe9-8b05f6545e80" >
+		<db:oracle-connection host="DESKTOP-43C3LIR" user="system" password="oraclepassword" instance="xe" />
+	</db:config>
+	<flow name="queryParamsFlow" doc:id="62a876d8-9aa4-4906-a77d-186cf13a5f62">
+		<db:select doc:name="Select" doc:id="c503fce0-f129-4963-b428-3dcaf726fcb3" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM arshemployees ]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="0530eda5-fb26-4d34-aa68-d28e89b8bd21" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import capitalize , camelize , underscore from dw::core::Strings
+output application/json
+---
+payload map (items,indexOfitems) -> {
+	ID: items.EID,
+	Name: upper ( items.ENAME default "" ),
+	Status: items.ESTATUS default "",
+	City: items.ECITY default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="282678c5-fb33-4928-beb9-44bdc152591d" message="#[payload]"/>
+	</flow>
+	<flow name="uriParamsFlow" doc:id="5b4e7305-18eb-40ca-a962-a92cf0f7afa9" >
+		<db:select doc:name="Copy_of_Select" doc:id="3e02bc17-d3b8-4b6f-86b6-8967d91582a2" config-ref="Database_Config" >
+			<db:sql ><![CDATA[SELECT * from arshemployees where eid = :eid]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ 'eid' : attributes.uriParams.id}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="2c3237fb-2bf5-465a-a969-bd58db3bd82d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (items,indexOf) ->{
+	ID: items.EID,
+	Name: items.ENAME default "",
+	Status: items.ESTATUS default "",
+	City: items.ECITY default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
